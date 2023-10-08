@@ -11,6 +11,9 @@ app.get('/', (req, res) => {
 app.get('/ayush', (req, res)=>{
     res.send("ayush")
 })
+app.get('/about', (req, res)=>{
+  res.send({"name ":"ayush gupta "})
+})
 
 // Start the server
 app.listen(port, () => {

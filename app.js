@@ -41,10 +41,7 @@ async function connectAndQuery() {
     var poolConnection = await sql.connect(config);
 
     console.log("Reading rows from the Table...");
-    var resultSet = await poolConnection.request().query(`SELECT * from nayi`);
-
-    console.log(resultSet);
-
+ 
 
     // // output column headers
     console.log("connected....");
@@ -59,14 +56,15 @@ async function connectAndQuery() {
 
 app.get("/about", async (req, res) => {
   await connectAndQuery();
-  sql.query("select * from test", (error, data) => {
+  sql.query("select name from nayi where id=2;", (error, data) => {
     if (error) {
       console.log("error");
       console.log(error);
       res.send({ error: "error" });
       return;
     } else {
-      res.send({ name: `${data.recordset[1].names}` });
+      console.log(data)
+      res.send({ name: `${data.recordset[0].name}` });
     }
   });
 });

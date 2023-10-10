@@ -8,12 +8,12 @@ const port = process.env.PORT || 3400; // Use 3000 as the default if PORT is not
 // Define a route
 
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://musical-snickerdoodle-08c739.netlify.app' );
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'https://musical-snickerdoodle-08c739.netlify.app' );
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+//   next();
+// });
 
 app.get('/', (req, res) => {
   res.send('Hello, Express!');
@@ -23,39 +23,40 @@ app.get('/ayush', (req, res)=>{
 })
 
 const config = {
-  user: "Ayush", // better stored in an app setting such as process.env.DB_USER
-  password: "Data@12345", // better stored in an app setting such as process.env.DB_PASSWORD
-  server: "render.database.windows.net", // better stored in an app setting such as process.env.DB_SERVER
-  port: 1433, // optional, defaults to 1433, better stored in an app setting such as process.env.DB_PORT
-  database: "Parking", // better stored in an app setting such as process.env.DB_NAME
+  user: process.env.DB_USER, // better stored in an app setting such as process.env.DB_USER
+  password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
+  server: process.env.DB_SERVER, // better stored in an app setting such as process.env.DB_SERVER
+  port: process.env.DB_PORT, // optional, defaults to 1433, better stored in an app setting such as process.env.DB_PORT
+  database: process.env.DB_NAME, // better stored in an app setting such as process.env.DB_NAME
   authentication: {
-    type: "default",
+    type:"default",
   },
   options: {
     encrypt: true,
   },
 };
-
+connectAndQuery();
 async function connectAndQuery() {
   try {
     var poolConnection = await sql.connect(config);
 
-    // console.log("Reading rows from the Table...");
-    // var resultSet = await poolConnection.request().query(`SELECT * from test`);
+    console.log("Reading rows from the Table...");
+    var resultSet = await poolConnection.request().query(`SELECT * from nayi`);
 
-    // console.log(resultSet.recordset[0].id);
+    console.log(resultSet);
 
-    // const arg="select * from test";
-    // var ress=await poolConnection.request().query(arg);
-    // console.log(ress);
 
     // // output column headers
     console.log("connected....");
     // // close connection only when we're certain application is finished
   } catch (err) {
+
+    console.log(":Errore")
     console.error(err.message);
   }
 }
+
+
 app.get("/about", async (req, res) => {
   await connectAndQuery();
   sql.query("select * from test", (error, data) => {

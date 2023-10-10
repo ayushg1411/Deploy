@@ -1,11 +1,14 @@
 const express = require('express');
 const app = express();
 const sql = require("mssql");
+const sequelize = require('./sequelize');
+
 require('dotenv').config();
 
 const port = process.env.PORT || 3400; // Use 3000 as the default if PORT is not defined
 
-// Define a route
+app.use(express.json());
+
 
 
 app.use((req, res, next) => {
@@ -15,6 +18,14 @@ app.use((req, res, next) => {
   next();
 });
 
+
+
+
+
+const { DataTypes } = require('sequelize');
+
+
+
 app.get('/', (req, res) => {
   res.send('Hello, Express!');
 });
@@ -22,53 +33,76 @@ app.get('/ayush', (req, res)=>{
     res.send("ayush")
 })
 
-const config = {
-  user: process.env.DB_USER, // better stored in an app setting such as process.env.DB_USER
-  password: process.env.DB_PASSWORD, // better stored in an app setting such as process.env.DB_PASSWORD
-  server: process.env.DB_SERVER, // better stored in an app setting such as process.env.DB_SERVER
-  port: process.env.DB_PORT, // optional, defaults to 1433, better stored in an app setting such as process.env.DB_PORT
-  database: process.env.DB_NAME, // better stored in an app setting such as process.env.DB_NAME
-  authentication: {
-    type:"default",
-  },
-  options: {
-    encrypt: true,
-  },
-};
-connectAndQuery();
-async function connectAndQuery() {
+
+
+app.post('/abouts', async(req, res) => {
   try {
-    var poolConnection = await sql.connect(config);
 
-    console.log("Reading rows from the Table...");
- 
+  
+   
+    // Use Sequelize to find a record in the Nayi table where id=2
+    const nayiRecord = await  User.findOne({ where: { id: req.body.id} });
 
-    // // output column headers
-    console.log("connected....");
-    // // close connection only when we're certain application is finished
-  } catch (err) {
-
-    console.log(":Errore")
-    console.error(err.message);
-  }
-}
-
-
-app.get("/about", async (req, res) => {
-  await connectAndQuery();
-  sql.query("select name from nayi where id=2;", (error, data) => {
-    if (error) {
-      console.log("error");
-      console.log(error);
-      res.send({ error: "error" });
+    if (!nayiRecord) {
+      // Handle the case where no record is found
+      res.status(404).json({ error: 'Record not found' });
       return;
-    } else {
-      console.log(data)
-      res.send({ name: `${data.recordset[0].name}` });
     }
-  });
+
+    // Access the 'name' attribute from the retrieved record
+    const name = nayiRecord.id;
+     console.log(req.body.id);
+    // Send a response with the retrieved data
+    console.log(name);
+    res.json({ name });
+  } catch (error) {
+    console.error('Error querying Nayi table:', error);
+
+    // Send an error response
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+ 
 });
 
+
+
+
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  // Add more fields as needed
+});
+
+// Create the table if it doesn't exist
+User.sync();
+
+
+app.get("/api/user", async(req, res)=>{
+  
+  try {
+    const newUser = await User.create({
+      username: 'exampleUser',
+      email: 'user@example.com',
+    });
+
+    console.log('New user created:', newUser.toJSON());
+  } catch (error) {
+    console.error('Error creating user:', error);
+  }
+
+
+})
 
 
 
